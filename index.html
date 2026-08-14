@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bid Management App — Interactive Prototype</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0e10; font-family: -apple-system, "Segoe UI", Calibri, Arial, sans-serif; padding: 24px; }
+.shell { max-width: 1180px; margin: 0 auto; background: #18181b; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; min-height: 640px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.topbar .app { display: flex; align-items: center; gap: 9px; color: #e9e9ec; font-size: 14px; font-weight: 700; }
+.topbar .app svg { color: #8ab4ff; }
+.topbar .who { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #9a9aa0; }
+.topbar .who .pill { display: flex; align-items: center; gap: 7px; background: #202024; border: 1px solid rgba(255,255,255,0.09); border-radius: 20px; padding: 5px 12px 5px 8px; }
+.topbar .who .pill .avatar { width: 20px; height: 20px; border-radius: 50%; background: #2f5fd6; color: #fff; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.topbar .who .pill.none .avatar { background: #3a3a40; }
+.topbar .who a { color: #8ab4ff; text-decoration: none; cursor: pointer; font-weight: 600; }
+.body { display: flex; }
+.sidebar { width: 250px; flex-shrink: 0; padding: 18px 12px; border-right: 1px solid rgba(255,255,255,0.08); }
+.navitem { display: flex; align-items: center; gap: 12px; color: #b7b7bc; text-decoration: none; font-size: 15px; padding: 10px 12px; border-radius: 10px; margin-bottom: 2px; cursor: pointer; }
+.navitem svg { flex-shrink: 0; opacity: .85; }
+.navitem:hover { background: rgba(255,255,255,0.05); color: #e9e9ec; }
+.navitem.active { background: #1d3a6e; color: #8ab4ff; font-weight: 600; }
+.navitem.active svg { opacity: 1; }
+.navitem.disabled { opacity: .32; pointer-events: none; }
+.navsep { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 4px 12px; }
+.navgroup { color: #6d6d73; font-size: 11px; letter-spacing: .05em; padding: 16px 12px 6px; }
+.main { flex: 1; padding: 28px 36px; color: #e9e9ec; }
+h1 { font-size: 22px; font-weight: 700; color: #f4f4f5; margin-bottom: 6px; }
+.subtitle { color: #8a8a90; font-size: 14px; margin-bottom: 22px; }
+.rolebadge { display: inline-flex; align-items: center; gap: 8px; background: #202024; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 6px 14px; font-size: 12.5px; color: #9a9aa0; margin-bottom: 18px; }
+.rolebadge a { color: #8ab4ff; font-weight: 600; text-decoration: none; cursor: pointer; }
+.stepwrap { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.stepwrap:last-child { border-bottom: none; }
+.stepnum { width: 24px; height: 24px; border-radius: 50%; background: #2f5fd6; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.stepbody { flex: 1; min-width: 0; }
+.stepbody .u { font-size: 15px; font-weight: 600; color: #f4f4f5; margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }
+.stepbody .u svg { opacity: .6; flex-shrink: 0; }
+.stepbody .s { font-size: 13.5px; color: #a5a5ab; padding-left: 24px; display: flex; align-items: center; gap: 7px; }
+.stepbody .s svg { opacity: .7; flex-shrink: 0; }
+.aicard { margin-top: 20px; border: 1px solid rgba(138,180,255,0.35); background: rgba(47,95,214,0.12); border-radius: 12px; padding: 16px 18px; display: flex; gap: 12px; }
+.aicard svg { color: #8ab4ff; flex-shrink: 0; margin-top: 2px; }
+.aicard .t { font-size: 13px; font-weight: 700; color: #8ab4ff; margin-bottom: 5px; }
+.aicard .d { font-size: 13.5px; color: #c2c2c8; line-height: 1.55; }
+.rolecards { display: flex; flex-direction: column; gap: 10px; }
+.rolecard { border: 1px solid rgba(255,255,255,0.1); background: #1c1c20; border-radius: 12px; padding: 16px 18px; cursor: pointer; }
+.rolecard:hover { border-color: #3a6fe0; background: #1d2436; }
+.rolecard .rl { font-size: 15px; font-weight: 700; color: #f4f4f5; margin-bottom: 3px; }
+.rolecard .rd { font-size: 13.5px; color: #9a9aa0; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="app"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Bid Management App</span></div>
+    <div class="who" id="whoBar"></div>
+  </div>
+  <div class="body">
+    <div class="sidebar" id="sidebarNav"></div>
+    <div class="main" id="mainContent"></div>
+  </div>
+</div>
+<script>
+const ICONS = {"home": "<path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9.5V20h5v-6h4v6h5V9.5\"/>", "grid": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1.5\"/>", "bell": "<path d=\"M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6\"/><path d=\"M10 20a2 2 0 0 0 4 0\"/>", "kanban": "<rect x=\"3\" y=\"4\" width=\"5\" height=\"16\" rx=\"1\"/><rect x=\"10\" y=\"4\" width=\"5\" height=\"10\" rx=\"1\"/><rect x=\"17\" y=\"4\" width=\"5\" height=\"13\" rx=\"1\"/>", "truck": "<rect x=\"1\" y=\"7\" width=\"13\" height=\"9\" rx=\"1\"/><path d=\"M14 10h4l3 3v3h-7z\"/><circle cx=\"6\" cy=\"18\" r=\"2\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/>", "bank": "<path d=\"M3 10 12 4l9 6\"/><rect x=\"4\" y=\"10\" width=\"16\" height=\"9\"/><line x1=\"2\" y1=\"21\" x2=\"22\" y2=\"21\"/>", "box": "<path d=\"M12 3 21 7.5 21 16.5 12 21 3 16.5 3 7.5z\"/><path d=\"M3 7.5 12 12 21 7.5\"/><line x1=\"12\" y1=\"12\" x2=\"12\" y2=\"21\"/>", "chart": "<rect x=\"4\" y=\"12\" width=\"4\" height=\"8\"/><rect x=\"10\" y=\"7\" width=\"4\" height=\"13\"/><rect x=\"16\" y=\"3\" width=\"4\" height=\"17\"/>", "list": "<line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\"/><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\"/><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\"/><circle cx=\"4\" cy=\"6\" r=\"1\"/><circle cx=\"4\" cy=\"12\" r=\"1\"/><circle cx=\"4\" cy=\"18\" r=\"1\"/>", "plus": "<line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/>", "usercheck": "<circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M2 21v-2a6 6 0 0 1 12 0\"/><path d=\"M16 11l2 2 4-4\"/>", "users": "<circle cx=\"8\" cy=\"8\" r=\"4\"/><path d=\"M1 21v-2a6 6 0 0 1 9.33-5\"/><circle cx=\"17\" cy=\"9\" r=\"3.5\"/><path d=\"M15.5 21v-1.5a4.5 4.5 0 0 1 6.5-4\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><polyline points=\"12,7 12,12 16,14\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 20c0-4 4-6 8-6s8 2 8 6\"/>", "arrow": "<line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/><polyline points=\"13,6 19,12 13,18\"/>", "sparkle": "<path d=\"M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18\"/>"};
+const PAGES = {"dashboard": {"label": "Dashboard", "icon": "grid", "group": "", "roles": ["owner", "manager"], "steps": [["User opens Dashboard", "System loads KPI cards: active opportunities, active pipeline value, bids due today/48hrs/this week, formal vs informal submitted, award value, win rate, expected gross profit"], ["User views the Needs Attention panel", "System automatically lists overdue bids, approaching deadlines, bids still sourcing near deadline, missing supplier quotes, bids awaiting management, low-margin bids, missing documents, and stale bids"], ["User clicks an item in Needs Attention", "System opens the filtered bid list behind that item"], ["User hovers a KPI card", "System shows the trend versus the previous period (e.g., +12% vs last month)"], ["A bid changes stage anywhere in the app", "System recalculates every affected KPI in real time, no page refresh needed"]], "futureAI": null}, "notifications": {"label": "Notifications", "icon": "bell", "group": "", "roles": ["owner", "manager", "specialist", "dataentry", "viewer"], "steps": [["A tracked event occurs (new assignment, due in 3 days, due tomorrow, due today, missing supplier quote, waiting for approval, returned for revision)", "System fires the alert as email and/or in-app notification per that user's preferences"], ["User opens Notifications", "System lists every alert in reverse-chronological order, unread ones highlighted"], ["User clicks a notification", "System opens the related bid directly to the relevant tab"], ["User opens notification preferences", "System lets them choose which events trigger an alert, and whether by email, in-app, or both"], ["User marks a notification read or clears it", "System updates the unread badge count in the sidebar immediately"]], "futureAI": null}, "pipeline": {"label": "Bid Pipeline", "icon": "kanban", "group": "", "roles": ["owner", "manager", "specialist"], "steps": [["User opens Bid Pipeline", "System renders a Kanban board, one column per stage, populated with every active bid"], ["User drags a card to the next stage", "System updates the bid's status, timestamps the change, and logs it to the audit trail"], ["User drags a card to No-Bid", "System requires a reason before the move is allowed to complete"], ["User filters by employee, agency, category, or due date", "System re-renders the board showing only matching cards"], ["(Automatic)", "System color-codes cards that are overdue or approaching deadline, across every column"], ["User clicks a card", "System opens that bid's Bid Detail page"]], "futureAI": null}, "suppliers": {"label": "Suppliers", "icon": "truck", "group": "", "roles": ["owner", "manager", "specialist"], "steps": [["User opens Suppliers", "System loads the directory: contacts, brands, territory, terms, lead time, authorized status"], ["User searches or filters by category or authorized status", "System returns matching suppliers"], ["User clicks a supplier", "System opens that supplier's profile with every linked bid and quote"], ["User compares two quotes on the same bid and marks one preferred", "System carries that supplier's cost data forward into Pricing automatically"], ["User attaches a spec sheet or manufacturer authorization", "System links the document to both the bid and this supplier's quote"], ["User adds or edits a supplier profile", "System saves the changes and reflects them across every linked bid"]], "futureAI": null}, "agencies": {"label": "Agencies", "icon": "bank", "group": "", "roles": ["owner", "manager", "viewer"], "steps": [["User opens Agencies", "System loads the agency/facility directory with procurement contacts"], ["User clicks an agency", "System shows opportunities, bids submitted, awards, win rate, award value, and categories for that agency"], ["(Ongoing use)", "System automatically links every new bid to its agency record and updates the stats"], ["User reviews an agency's history", "System surfaces recurring purchasing patterns \u2014 categories or products this agency buys repeatedly"]], "futureAI": null}, "products": {"label": "Products", "icon": "box", "group": "", "roles": ["owner", "manager", "specialist"], "steps": [["User searches for a product, model, or part number", "System returns times bid, wins, last supplier, last cost, average bid price, last bid date"], ["User clicks into a product", "System shows every historical supplier, price, agency, award, and document tied to it"], ["This same product appears on a new solicitation later", "System automatically surfaces this product-history card as a Historical Match during New Bid entry"]], "futureAI": "AI Historical Matching \u2014 identify similar previous bids even when exact manufacturer/model information is unavailable, e.g. \u201cWe found 3 previous bids with similar technical requirements,\u201d so employees can review past suppliers, prices, and results without an exact identifier match."}, "reports": {"label": "Reports", "icon": "chart", "group": "", "roles": ["owner", "manager", "viewer"], "steps": [["User selects a report type", "System presents relevant filters for that report"], ["User applies filters (employee, agency, category, portal, date range, formal vs informal)", "System generates the report from live data"], ["User clicks Export", "System downloads the report as Excel/CSV"]], "futureAI": null}, "allbids": {"label": "All Bids", "icon": "list", "group": "Bids", "roles": ["owner", "manager", "dataentry", "viewer"], "steps": [["User opens All Bids", "System loads the full bid table: Bid ID, agency, item, status, due date, assigned to, estimated value"], ["User types in search or applies a filter", "System filters rows in real time"], ["User selects multiple rows", "System enables bulk export of the selection to CSV"], ["User clicks Import", "System opens a CSV/Excel import dialog, validates the file, flags duplicates, and bulk-creates records"], ["User clicks a row", "System opens the Bid Detail page (Overview, Qualification, Sourcing, Pricing, Review, Submission, Award, Documents tabs)"]], "futureAI": null}, "newbid": {"label": "New Bid", "icon": "plus", "group": "Bids", "roles": ["owner", "manager", "specialist", "dataentry"], "steps": [["User clicks New Bid", "System opens a blank intake form"], ["User enters agency, solicitation number, due date, item description", "System validates required fields as they're entered"], ["User enters manufacturer, model, part number, or NSN/NIGP/NAICS", "System checks in real time and shows a \u201cHistorical Match Found\u201d banner if this item was bid before"], ["User adds a second line item to the same solicitation", "System keeps all line items grouped under one Bid ID, each trackable individually"], ["User uploads the solicitation PDF and any attachments", "System stores the documents against the new record"], ["User clicks Save", "System auto-generates the next sequential Bid ID and opens the new Bid Detail page on the Qualification tab"]], "futureAI": "Automated bid intake from government APIs, email parsing, RSS feeds, or RPA/browser automation \u2014 so opportunities can be pulled in without manual entry. AI Solicitation Analysis: upload a solicitation PDF and auto-extract the number, agency, due date, items, quantities, specs, delivery location, certifications, site visit, and required documents into this form."}, "mybids": {"label": "My Bids", "icon": "usercheck", "group": "Bids", "roles": ["owner", "manager", "specialist"], "steps": [["User opens My Bids", "System loads bids assigned to the logged-in user, grouped into New, Due Today/Tomorrow/This Week, Waiting for Supplier, Ready for Review"], ["(No action \u2014 time passes)", "System recalculates days remaining continuously and moves each bid into the right group automatically"], ["A manager assigns a new bid to this user", "System notifies them and adds it to New Assignments"], ["User requests reassignment on a bid", "System routes the request to their manager for approval"], ["User clicks a bid", "System opens the Bid Detail page"]], "futureAI": null}, "users": {"label": "Users and roles", "icon": "users", "group": "Admin", "roles": ["owner"], "steps": [["Admin opens Users and Roles", "System lists all users with their current role and status"], ["Admin assigns or changes a role", "System applies that role's screen and financial-data permissions immediately"], ["Admin clicks a user", "System shows that user's assigned bids and recent activity"], ["Admin deactivates a user", "System revokes their access immediately and reassigns their open bids"]], "futureAI": null}, "audit": {"label": "Audit trail", "icon": "clock", "group": "Admin", "roles": ["owner"], "steps": [["User opens Audit Trail", "System loads a chronological log of every tracked action with user, action, date, and time"], ["User filters by user, date range, or action type", "System filters the log to matching entries"], ["User clicks a log entry", "System shows the before/after detail, e.g. pricing changed from $12,400 to $11,800"]], "futureAI": null}};
+const ROLES = {"owner": {"label": "Owner / Admin", "desc": "Full access to every page."}, "manager": {"label": "Bid Manager", "desc": "Assignments, approvals, bids and reporting."}, "specialist": {"label": "Bid Specialist", "desc": "Assigned bids, sourcing, pricing and documents."}, "dataentry": {"label": "Data Entry / Admin", "desc": "Create opportunities and upload solicitations. No financial or employee data."}, "viewer": {"label": "Accounting / Viewer", "desc": "Limited post-award and financial access."}};
+const NAV_ORDER = ["dashboard", "notifications", "pipeline", "suppliers", "agencies", "products", "reports", "allbids", "newbid", "mybids", "users", "audit"];
+
+function icon(name, size) {
+  size = size || 17;
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg>';
+}
+
+let currentRole = null;
+let currentPage = "home";
+
+function allowedKeys() {
+  if (!currentRole) return NAV_ORDER;
+  return NAV_ORDER.filter(k => PAGES[k].roles.indexOf(currentRole) !== -1);
+}
+
+function firstAllowed(role) {
+  for (const k of NAV_ORDER) {
+    if (k === "notifications") continue;
+    if (PAGES[k].roles.indexOf(role) !== -1) return k;
+  }
+  return NAV_ORDER[0];
+}
+
+function renderSidebar() {
+  const allowed = new Set(allowedKeys());
+  const groups = {};
+  NAV_ORDER.forEach(k => {
+    const g = PAGES[k].group || "__top";
+    (groups[g] = groups[g] || []).push(k);
+  });
+  let html = '<div class="navitem'+(currentPage==="home"?" active":"")+'" data-key="home">'+icon("home")+'<span>Home</span></div><div class="navsep"></div>';
+  ["__top", "Bids", "Admin"].forEach(g => {
+    if (!groups[g]) return;
+    if (g !== "__top") html += '<div class="navgroup">'+g.toUpperCase()+'</div>';
+    groups[g].forEach(k => {
+      const p = PAGES[k];
+      const ok = allowed.has(k);
+      const active = currentPage === k ? " active" : "";
+      html += '<div class="navitem'+(ok?"":" disabled")+active+'" data-key="'+k+'">'+icon(p.icon)+'<span>'+p.label+'</span></div>';
+    });
+  });
+  document.getElementById("sidebarNav").innerHTML = html;
+  document.querySelectorAll(".navitem[data-key]").forEach(el => {
+    el.addEventListener("click", () => {
+      if (el.classList.contains("disabled")) return;
+      currentPage = el.dataset.key;
+      renderAll();
+    });
+  });
+}
+
+function renderHome() {
+  const cards = Object.entries(ROLES).map(([key, r]) => (
+    '<div class="rolecard" data-role="'+key+'"><div class="rl">'+r.label+'</div><div class="rd">'+r.desc+'</div></div>'
+  )).join("");
+  document.getElementById("mainContent").innerHTML =
+    '<h1>Home</h1>' +
+    '<div class="subtitle">Pick a role to preview exactly what that person can see and do.</div>' +
+    '<div class="rolecards">'+cards+'</div>';
+  document.querySelectorAll(".rolecard[data-role]").forEach(el => {
+    el.addEventListener("click", () => {
+      currentRole = el.dataset.role;
+      currentPage = firstAllowed(currentRole);
+      renderAll();
+    });
+  });
+}
+
+function stepsHtml(steps) {
+  return steps.map((s, i) => (
+    '<div class="stepwrap"><div class="stepnum">'+(i+1)+'</div>' +
+    '<div class="stepbody"><div class="u">'+icon("user",14)+s[0]+'</div>' +
+    '<div class="s">'+icon("arrow",13)+s[1]+'</div></div></div>'
+  )).join("");
+}
+
+function aiHtml(text) {
+  if (!text) return "";
+  return '<div class="aicard">'+icon("sparkle",18)+
+    '<div><div class="t">Future opportunity — Phase 3 AI</div><div class="d">'+text+'</div></div></div>';
+}
+
+function renderPage(key) {
+  const p = PAGES[key];
+  document.getElementById("mainContent").innerHTML =
+    '<h1>'+p.label+'</h1>' +
+    '<div class="subtitle">User action &rarr; system behavior &middot; '+p.steps.length+' steps</div>' +
+    stepsHtml(p.steps) +
+    aiHtml(p.futureAI);
+}
+
+function initials(role) {
+  return ROLES[role].label.split(/[\s/]+/).filter(Boolean).map(w => w[0]).join("").slice(0,2).toUpperCase();
+}
+
+function renderTopBar() {
+  const bar = document.getElementById("whoBar");
+  if (currentRole) {
+    bar.innerHTML = '<div class="pill"><div class="avatar">'+initials(currentRole)+'</div><span>Viewing as <strong style="color:#e9e9ec">'+ROLES[currentRole].label+'</strong></span></div><a id="switchRoleLink">Switch role</a>';
+  } else {
+    bar.innerHTML = '<div class="pill none"><div class="avatar">'+icon("user",12)+'</div><span>No user selected</span></div><a id="switchRoleLink">Choose a role</a>';
+  }
+  const link = document.getElementById("switchRoleLink");
+  if (link) link.addEventListener("click", () => { currentRole = null; currentPage = "home"; renderAll(); });
+}
+
+function renderAll() {
+  renderSidebar();
+  renderTopBar();
+  if (currentPage === "home") renderHome();
+  else renderPage(currentPage);
+}
+
+renderAll();
+</script>
+</body>
+</html>
